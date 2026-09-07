@@ -732,7 +732,8 @@ void DevToolsHttpHandler::DecompressAndSendJsonProtocol(int connection_id) {
                                 base::Unretained(server_wrapper_.get()),
                                 connection_id, response));
 #else
-  NOTREACHED();
+  SendJson(connection_id, net::HTTP_NOT_FOUND, std::nullopt,
+           "Protocol schema is not bundled in this headless build.");
 #endif  // BUILDFLAG(ENABLE_DEVTOOLS_FRONTEND)
 }
 

@@ -5,6 +5,7 @@
 #include "headless/lib/browser/headless_devtools_manager_delegate.h"
 
 #include "build/build_config.h"
+#include "content/public/common/buildflags.h"
 #include "content/public/browser/devtools_agent_host.h"
 #include "content/public/browser/devtools_agent_host_client_channel.h"
 #include "content/public/browser/web_contents.h"
@@ -53,7 +54,7 @@ HeadlessDevToolsManagerDelegate::CreateNewTarget(
 }
 
 bool HeadlessDevToolsManagerDelegate::HasBundledFrontendResources() {
-  return true;
+  return BUILDFLAG(ENABLE_DEVTOOLS_FRONTEND);
 }
 
 void HeadlessDevToolsManagerDelegate::ClientAttached(

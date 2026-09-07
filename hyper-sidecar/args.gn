@@ -1,0 +1,17 @@
+import("//build/args/headless.gn")
+
+angle_enable_vulkan_validation_layers = false
+enable_devtools_frontend = false
+enable_extensions = false
+enable_pdf = false
+enable_printing = false
+ffmpeg_branding = "Chrome"
+is_component_build = false
+is_debug = false
+is_official_build = true
+optimize_for_size = true
+proprietary_codecs = true
+symbol_level = 0
+target_cpu = "x64"
+use_remoteexec = false
+use_siso = false

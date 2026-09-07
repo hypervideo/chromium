@@ -1,0 +1,56 @@
+name: Hyper headless Chromium
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  linux:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    steps:
+      - name: Reserve space on the disposable runner
+        run: |
+          sudo rm -rf /usr/local/lib/android /usr/share/dotnet /opt/ghc /opt/hostedtoolcache/CodeQL
+          df -h
+          sudo sysctl -w vm.max_map_count=262144
+          sudo fallocate -l 8G /mnt/hyper-chromium.swap
+          sudo chmod 600 /mnt/hyper-chromium.swap
+          sudo mkswap /mnt/hyper-chromium.swap
+          sudo swapon /mnt/hyper-chromium.swap
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          path: src
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Install pinned depot tools
+        run: |
+          git init depot_tools
+          git -C depot_tools remote add origin https://chromium.googlesource.com/chromium/tools/depot_tools.git
+          git -C depot_tools fetch --depth 1 origin 69a652ea05e450f84620f56957a801923186fda5
+          git -C depot_tools checkout --detach FETCH_HEAD
+          echo "$GITHUB_WORKSPACE/depot_tools" >> "$GITHUB_PATH"
+          echo "DEPOT_TOOLS_UPDATE=0" >> "$GITHUB_ENV"
+      - name: Install build dependencies
+        run: sudo src/build/install-build-deps.sh --no-prompt --no-arm --no-chromeos-fonts --no-nacl
+      - name: Fetch pinned Chromium dependencies
+        run: |
+          python3 src/hyper-sidecar/configure-checkout.py
+          gclient sync --no-history --nohooks --shallow -j 4 --revision "src@$GITHUB_SHA"
+          gclient runhooks
+          df -h
+      - name: Configure and compile
+        working-directory: src
+        run: |
+          mkdir -p out/HyperHeadless
+          cp hyper-sidecar/args.gn out/HyperHeadless/args.gn
+          gn gen out/HyperHeadless --root-target=//headless --root-pattern=//headless:headless_shell
+          autoninja -C out/HyperHeadless headless_shell -j 4
+      - name: Package experimental browser
+        working-directory: src
+        run: python3 hyper-sidecar/package.py
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: hyper-headless-linux-x64
+          path: src/hyper-headless-linux-x64.tar.zst
+          retention-days: 7
+          compression-level: 0
