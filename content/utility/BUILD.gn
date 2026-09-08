@@ -10,6 +10,7 @@ import("//media/media_options.gni")
 import("//mojo/public/tools/bindings/mojom.gni")
 import("//printing/buildflags/buildflags.gni")
 import("//services/accessibility/buildflags.gni")
+import("//services/on_device_model/on_device_model.gni")
 import("//services/screen_ai/buildflags/features.gni")
 
 source_set("utility") {
@@ -50,7 +51,6 @@ source_set("utility") {
     "//content/public/common:common_sources",
     "//content/public/common:content_descriptor_keys",
     "//content/services/auction_worklet",
-    "//content/utility/on_device_model:on_device_model_sandbox_init",
     "//device/vr/buildflags",
     "//media:media_buildflags",
     "//mojo/public/cpp/bindings",
@@ -62,9 +62,7 @@ source_set("utility") {
     "//services/data_decoder:lib",
     "//services/data_decoder/public/cpp",
     "//services/network:network_service",
-    "//services/on_device_model:on_device_model_service",
-    "//services/on_device_model/public/cpp",
-    "//services/on_device_model/public/mojom",
+    "//services/on_device_model/public/cpp:buildflags",
     "//services/screen_ai/buildflags",
     "//services/service_manager/public/cpp",
     "//services/service_manager/public/mojom",
@@ -77,6 +75,15 @@ source_set("utility") {
     "//third_party/blink/public:blink_headers",
     "//url",
   ]
+
+  if (use_on_device_model_service) {
+    deps += [
+      "//content/utility/on_device_model:on_device_model_sandbox_init",
+      "//services/on_device_model:on_device_model_service",
+      "//services/on_device_model/public/cpp",
+      "//services/on_device_model/public/mojom",
+    ]
+  }
 
   # When library CDMs are supported, we support running the CDM in the utility
   # process using mojo MediaService. On Windows, we use MediaFoundationService.

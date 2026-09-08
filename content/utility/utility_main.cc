@@ -29,13 +29,18 @@
 #include "content/public/common/content_switches.h"
 #include "content/public/common/main_function_params.h"
 #include "content/public/utility/content_utility_client.h"
+#include "services/on_device_model/public/cpp/buildflags.h"
+#if BUILDFLAG(USE_ON_DEVICE_MODEL_SERVICE)
 #include "content/utility/on_device_model/on_device_model_sandbox_init.h"
+#endif
 #include "content/utility/utility_thread_impl.h"
 #include "printing/buildflags/buildflags.h"
 #include "sandbox/policy/mojom/sandbox.mojom.h"
 #include "sandbox/policy/sandbox.h"
 #include "sandbox/policy/sandbox_type.h"
+#if BUILDFLAG(USE_ON_DEVICE_MODEL_SERVICE)
 #include "services/on_device_model/public/mojom/on_device_model_service.mojom.h"
+#endif
 #include "services/tracing/public/cpp/trace_startup.h"
 
 #if BUILDFLAG(IS_LINUX) || BUILDFLAG(IS_CHROMEOS)
@@ -272,9 +277,11 @@ int UtilityMain(MainFunctionParams parameters) {
     }
   }
 
+#if BUILDFLAG(USE_ON_DEVICE_MODEL_SERVICE)
   if (utility_sub_type == on_device_model::mojom::OnDeviceModelService::Name_) {
     CHECK(on_device_model::PreSandboxInit());
   }
+#endif
 
 #if BUILDFLAG(IS_LINUX) || BUILDFLAG(IS_CHROMEOS)
 
@@ -316,8 +323,12 @@ int UtilityMain(MainFunctionParams parameters) {
       pre_sandbox_hook = base::BindOnce(&audio::AudioPreSandboxHook);
       break;
     case sandbox::mojom::Sandbox::kOnDeviceModelExecution:
+#if BUILDFLAG(USE_ON_DEVICE_MODEL_SERVICE)
       on_device_model::AddSandboxLinuxOptions(sandbox_options);
       pre_sandbox_hook = base::BindOnce(&on_device_model::PreSandboxHook);
+#else
+      NOTREACHED();
+#endif
       break;
     case sandbox::mojom::Sandbox::kSpeechRecognition:
       pre_sandbox_hook =
@@ -485,9 +496,11 @@ int UtilityMain(MainFunctionParams parameters) {
 
   run_loop.Run();
 
+#if BUILDFLAG(USE_ON_DEVICE_MODEL_SERVICE)
   if (utility_sub_type == on_device_model::mojom::OnDeviceModelService::Name_) {
     CHECK(on_device_model::Shutdown());
   }
+#endif
 
 #if defined(LEAK_SANITIZER)
   // Invoke LeakSanitizer before shutting down the utility thread, to avoid

@@ -15,3 +15,9 @@ symbol_level = 0
 target_cpu = "x64"
 use_remoteexec = false
 use_siso = false
+
+# Experimental browser ML/WebGPU removal; WebRTC and WebGL remain enabled.
+skia_use_dawn = false
+use_dawn = false
+use_on_device_model_service = false
+webnn_use_tflite = false

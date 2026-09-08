@@ -22,3 +22,17 @@ machine. The other patches make upstream's DevTools frontend switch configurable
 and make headless packaging respect it. Keep these patches small when updating
 the pinned Chromium revision; this experiment is not an automatic security
 update mechanism.
+
+## Media-minimal comparison
+
+This experimental variant removes the browser on-device model service, WebNN
+TFLite backend, WebGPU and Skia Graphite/Dawn backend. WebRTC audio processing,
+video codecs, Web Audio, MediaRecorder, canvas, WebGL and ANGLE/SwiftShader
+remain enabled. The utility-process source guards make the existing
+`use_on_device_model_service` build argument actually exclude the service and
+its sandbox initializer. Simply setting the build argument left those
+implementations and Dawn linked through unconditional content dependencies.
+
+This variant must pass the same media and recording probes before adoption.
+Applications that require browser WebGPU or built-in browser ML APIs must use
+the full variant. No measured size or resource improvement is claimed yet.

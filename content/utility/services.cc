@@ -31,8 +31,11 @@
 #include "services/audio/service_factory.h"
 #include "services/data_decoder/data_decoder_service.h"
 #include "services/network/network_service.h"
+#include "services/on_device_model/public/cpp/buildflags.h"
+#if BUILDFLAG(USE_ON_DEVICE_MODEL_SERVICE)
 #include "services/on_device_model/on_device_model_service.h"
 #include "services/on_device_model/public/mojom/on_device_model_service.mojom.h"
+#endif
 #include "services/tracing/public/mojom/tracing_service.mojom.h"
 #include "services/tracing/tracing_service.h"
 #include "services/video_capture/public/mojom/video_capture_service.mojom.h"
@@ -331,11 +334,13 @@ auto RunVideoCapture(
   return service;
 }
 
+#if BUILDFLAG(USE_ON_DEVICE_MODEL_SERVICE)
 auto RunOnDeviceModel(
     mojo::PendingReceiver<on_device_model::mojom::OnDeviceModelService>
         receiver) {
   return on_device_model::OnDeviceModelService::Create(std::move(receiver));
 }
+#endif
 
 #if BUILDFLAG(ENABLE_VR) && !BUILDFLAG(IS_ANDROID)
 auto RunXrDeviceService(
@@ -401,9 +406,11 @@ void RegisterMainThreadServices(mojo::ServiceFactory& services) {
   services.Add(RunOOPVideoDecoderFactoryProcessService);
 #endif
 
+#if BUILDFLAG(USE_ON_DEVICE_MODEL_SERVICE)
   if (optimization_guide::features::CanLaunchOnDeviceModelService()) {
     services.Add(RunOnDeviceModel);
   }
+#endif
 
 #if BUILDFLAG(IS_WIN) || (BUILDFLAG(GOOGLE_CHROME_BRANDING) && \
                           (BUILDFLAG(IS_CHROMEOS) || BUILDFLAG(IS_LINUX)))
