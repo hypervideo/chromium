@@ -28,7 +28,8 @@ jobs:
           git -C depot_tools remote add origin https://chromium.googlesource.com/chromium/tools/depot_tools.git
           git -C depot_tools fetch --depth 1 origin 69a652ea05e450f84620f56957a801923186fda5
           git -C depot_tools checkout --detach FETCH_HEAD
-          DEPOT_TOOLS_UPDATE=0 depot_tools/ensure_bootstrap
+          DEPOT_TOOLS_UPDATE=0 "$GITHUB_WORKSPACE/depot_tools/ensure_bootstrap"
+          "$GITHUB_WORKSPACE/depot_tools/python-bin/python3" --version
           echo "$GITHUB_WORKSPACE/depot_tools" >> "$GITHUB_PATH"
           echo "DEPOT_TOOLS_UPDATE=0" >> "$GITHUB_ENV"
       - name: Install build dependencies
